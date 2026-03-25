@@ -1,20 +1,17 @@
 from sqlalchemy import String, ForeignKey, Text, JSON, DateTime
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from typing import List, Optional
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import List, Optional, Annotated
 from datetime import datetime
-
-
-class Base(DeclarativeBase):
-    pass
+from database import Base
 
 
 class Source(Base):
     """Источник материала: загруженный файл или найденная книга"""
     __tablename__ = 'source'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(256), index=True)
-    author: Mapped[Optional[str]] = mapped_column(String(256), index=True)
+    id: Mapped[Base.id]
+    title: Mapped[Base.str_256_indexed]
+    author: Mapped[Base.str_256_indexed_nullable]
 
     # Тип контента: 'file', 'book_name', 'youtube_url'
     source_type: Mapped[str] = mapped_column(String(50))
@@ -25,14 +22,14 @@ class Source(Base):
     test: Mapped[List["Test"]] = relationship(back_populates='source',
                                               cascade='all, delete-orphan')
     # Время создания
-    created_at: Mapped[DateTime] = mapped_column(default=datetime.utcnow)
+    created_at: Mapped[DateTime] = mapped_column(default=datetime.utcnow())
 
 
 class Test(Base):
     """Сам тест, созданный нейронкой"""
     __tablename__ = 'test'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[Base.id]
     source_id: Mapped[int] = mapped_column(ForeignKey('source.id'))
 
     # Уровень сложности или тема (например, "Глава 1")
@@ -47,7 +44,7 @@ class Question(Base):
     """Конкретный вопрос теста"""
     __tablename__ = 'question'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[Base.id]
     test_id: Mapped[int] = mapped_column(ForeignKey('test.id'))
 
     question_text: Mapped[str] = mapped_column(Text)
